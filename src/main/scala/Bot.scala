@@ -40,7 +40,7 @@ class ControlFunction {
 class PathFinder (view: MyView) {
   def findPath() = {
     val cellsWithOtherThanWall: Seq[(Int, Int)] = for {
-      x <- -1 to 1
+      x <- List(1, -1, 0)
       y <- -1 to 1 if view.at(x,y)!='W' && view.at(x,y)!='M'
     } yield (x,y)
 
