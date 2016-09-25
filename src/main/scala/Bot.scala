@@ -56,14 +56,45 @@ case class Snorg() extends Kind
 // EXERCISE: Implement findPath, so that the Bot does not crash into a wall
 class PathFinder (view: MyView) {
   def findPath() = {
-    val cellsWithOtherThanWall: Seq[(Int, Int)] = for {
-      x <- List(1, -1, 0)
-      y <- -1 to 1 if view.at(x,y)!='W' && view.at(x,y)!='M'
-    } yield (x,y)
 
-    val firstFreeCell: (Int, Int) = cellsWithOtherThanWall.head
-    println (s"FREE CELL: ${firstFreeCell}, CHAR = ${view.at(firstFreeCell._1,firstFreeCell._2)}")
-    firstFreeCell
+    var target = (1, -1)  // default moving direction
+
+    // what kinds of things are in the view?
+    val viewContents: Seq[Field] = for {
+      x <- -1 to 1
+      y <- -1 to 1
+      e = view.at(x,y) match {
+        case '_' => Empty(x,y)
+        case 'M' => BotSelf(x,y)
+        case 'W' => Wall(x,y)
+        case 'P' => Entity(Zugar(), x, y)
+        case 'B' => Entity(Fluppet(), x, y)
+        case 'p' => Entity(Toxifera(), x, y)
+        case 'b' => Entity(Snorg(), x, y)
+        case _ => Unknown(x,y)
+      }
+    } yield e
+
+    // find out what's edible/good
+    val edible = viewContents.filter(f => {
+      f match {
+        case Entity(Zugar(), _, _) => true
+        case Entity(Fluppet(), _, _) => true
+        case _ => false
+      }
+    })
+
+    // move towards edible things
+    if (edible.nonEmpty) {
+      val targetField = edible.head
+      target = targetField match {
+        case Entity(Zugar(), x, y) => (x, y)
+        case Entity(Fluppet(), x, y) => (x, y)
+      }
+    }
+
+    println (s"FREE CELL: ${target}, CHAR = ${view.at(target._1,target._2)}")
+    target
   }
 
 }
