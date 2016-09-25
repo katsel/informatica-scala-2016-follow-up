@@ -56,11 +56,6 @@ case class Snorg() extends Kind
 // NEW
 // EXERCISE: Implement findPath, so that the Bot does not crash into a wall
 class PathFinder (view: MyView) {
-  def changeDirection(movingDirection: (Int, Int)): (Int, Int) = {
-    val (x, y) = movingDirection
-    return (-x, -y)
-  }
-
   def findPath(movingDirection: (Int, Int)) = {
 
     var target = movingDirection  // default moving direction
@@ -89,6 +84,16 @@ class PathFinder (view: MyView) {
         case Entity(Toxifera(), _, _) => true
         case Entity(Snorg(), _, _) => true
         case _ => false
+      }
+    })
+
+  val free = viewContents.filter(f => {
+      f match {
+        case BotSelf(_,_) => false
+        case Wall(_,_) => false
+        case Entity(Toxifera(), _, _) => false
+        case Entity(Snorg(), _, _) => false
+        case _ => true
       }
     })
 
@@ -121,11 +126,12 @@ class PathFinder (view: MyView) {
     })
     blockInDirection match {
       case None => {}
-      case Some(f) => {
-        f match {
-          case Wall(x,y) => target = changeDirection((x, y))
-          case Entity(Toxifera(),x,y) => target = changeDirection((x, y))
-          case Entity(Snorg(),x,y) => target = changeDirection((x, y))
+      case Some(_) => {  // we are blocked
+        val field = free.head
+        target = field match {  // get x, y
+          case Empty(x,y) => (x,y)
+          case Entity(Zugar(), x, y) => (x, y)
+          case Entity(Fluppet(), x, y) => (x, y)
         }
       }
     }
