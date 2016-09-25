@@ -27,4 +27,19 @@ class BotTest05 extends FunSuite {
     val reply: String = bot.respond(serverInput)
     reply shouldBe empty
   }
+
+  test("""[ON React] The bot should move towards a zugar when it sees them""") {
+    val serverInput: String = "React(generation=0,time=0,view=________P,energy=100)"
+
+    val reply: String = bot.respond(serverInput)
+    reply.should(be("Move(direction=1:1)|Status(text=100)"))
+  }
+
+  test("""[ON React] The bot should move towards a fluppet when it sees them""") {
+    val serverInput: String = "React(generation=0,time=0,view=_______B_,energy=100)"
+
+    val reply: String = bot.respond(serverInput)
+    reply.should(be("Move(direction=0:1)|Status(text=100)"))
+  }
+
 }
