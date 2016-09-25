@@ -1,7 +1,6 @@
 // Tutorial Bot Class
 
-class ControlFunction {
-
+class ControlFunction(var movingDirection: (Int, Int)) {
   // The only door to the EXTERNAL world:
   //
   // Callback function, which is always called, when anything in the world around changes.
@@ -18,7 +17,9 @@ class ControlFunction {
 
   private def findPath(view: String) = {
     val pathFinder = new PathFinder(new MyView(view))
-    pathFinder.findPath()
+    val nextMovement = pathFinder.findPath(movingDirection)
+    this.movingDirection = nextMovement
+    nextMovement
   }
 
   private def parse(input: String): (String, Map[String, String]) = {
@@ -55,9 +56,9 @@ case class Snorg() extends Kind
 // NEW
 // EXERCISE: Implement findPath, so that the Bot does not crash into a wall
 class PathFinder (view: MyView) {
-  def findPath() = {
+  def findPath(movingDirection: (Int, Int)) = {
 
-    var target = (1, -1)  // default moving direction
+    var target = movingDirection  // default moving direction
 
     // what kinds of things are in the view?
     val viewContents: Seq[Field] = for {
@@ -129,6 +130,6 @@ class MyView (val view: String){
 // Entry Point for the Server
 
 class ControlFunctionFactory {
-  def create = new ControlFunction().respond _
+  def create = new ControlFunction((1, -1)).respond _
 }
 

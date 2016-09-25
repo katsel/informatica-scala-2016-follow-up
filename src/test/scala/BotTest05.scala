@@ -5,7 +5,7 @@ import org.scalatest.Matchers._
 // - http://www.scalatest.org/getting_started_with_fun_suite
 // - http://www.scalatest.org/at_a_glance/FunSuite
 class BotTest05 extends FunSuite {
-  val bot = new ControlFunction
+  val bot = new ControlFunction((1,-1))
 
   test("[ON React] The bot should move up and have its current energy state as status-message, if there are no impediments.") {
     val serverInput: String = "React(generation=0,time=0,view=_________,energy=100)"
