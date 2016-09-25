@@ -76,6 +76,17 @@ class PathFinder (view: MyView) {
       }
     } yield e
 
+    // find out what's bad
+    val blocked = viewContents.filter(f => {
+      f match {
+        case BotSelf(_,_) => true
+        case Wall(_,_) => true
+        case Entity(Toxifera(), _, _) => true
+        case Entity(Snorg(), _, _) => true
+        case _ => false
+      }
+    })
+
     // find out what's edible/good
     val edible = viewContents.filter(f => {
       f match {
