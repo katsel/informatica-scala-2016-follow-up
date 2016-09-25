@@ -1,5 +1,7 @@
 // Tutorial Bot Class
 
+import scala.util.Random
+
 class ControlFunction(var movingDirection: (Int, Int)) {
   // The only door to the EXTERNAL world:
   //
@@ -127,7 +129,7 @@ class PathFinder (view: MyView) {
     blockInDirection match {
       case None => {}
       case Some(_) => {  // we are blocked
-        val field = free.head
+        val field = Random.shuffle(free.toList).head  // pick free field
         target = field match {  // get x, y
           case Empty(x,y) => (x,y)
           case Entity(Zugar(), x, y) => (x, y)
