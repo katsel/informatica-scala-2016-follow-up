@@ -35,6 +35,23 @@ class ControlFunction {
   }
 }
 
+// abstract class: field (empty, wall, entity)
+abstract class Field
+case class BotSelf(x: Int, y: Int) extends Field
+case class Empty(x: Int, y: Int) extends Field
+case class Wall(x: Int, y: Int) extends Field
+case class Entity(kind: Kind, x: Int, y: Int) extends Field
+case class Unknown(x: Int, y: Int) extends Field
+
+abstract class Kind
+// good things
+case class Zugar() extends Kind
+case class Fluppet() extends Kind
+// evil things
+case class Toxifera() extends Kind
+case class Snorg() extends Kind
+
+
 // NEW
 // EXERCISE: Implement findPath, so that the Bot does not crash into a wall
 class PathFinder (view: MyView) {
