@@ -117,8 +117,8 @@ class PathFinder (view: MyView) {
       }
     }
 
-    // is moving direction blocked?
-    val blockInDirection = blocked.find(f => {
+    // is the moving direction blocked?
+    val blockInDirection = blocked.exists(f => {
       f match {
         case Wall(x,y) => (x,y) == target
         case Entity(Toxifera(),x,y) => (x,y) == target
@@ -126,15 +126,12 @@ class PathFinder (view: MyView) {
         case _ => false
       }
     })
-    blockInDirection match {
-      case None => {}
-      case Some(_) => {  // we are blocked
-        val field = Random.shuffle(free.toList).head  // pick free field
-        target = field match {  // get x, y
-          case Empty(x,y) => (x,y)
-          case Entity(Zugar(), x, y) => (x, y)
-          case Entity(Fluppet(), x, y) => (x, y)
-        }
+    if (blockInDirection) {  // we are blocked
+      val field = Random.shuffle(free.toList).head  // pick free field
+      target = field match {  // get x, y
+        case Empty(x,y) => (x,y)
+        case Entity(Zugar(), x, y) => (x, y)
+        case Entity(Fluppet(), x, y) => (x, y)
       }
     }
 
