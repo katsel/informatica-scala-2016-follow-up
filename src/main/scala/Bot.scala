@@ -89,7 +89,8 @@ class PathFinder (view: MyView) {
       }
     })
 
-  val free = viewContents.filter(f => {
+    // find free cells
+    val free = viewContents.filter(f => {
       f match {
         case BotSelf(_,_) => false
         case Wall(_,_) => false
@@ -117,7 +118,7 @@ class PathFinder (view: MyView) {
       }
     }
 
-    // is the moving direction blocked?
+    // find out if moving direction is blocked
     val blockInDirection = blocked.exists(f => {
       f match {
         case Wall(x,y) => (x,y) == target
@@ -126,6 +127,7 @@ class PathFinder (view: MyView) {
         case _ => false
       }
     })
+    // move away from obstacles and evil things
     if (blockInDirection) {  // we are blocked
       val field = Random.shuffle(free.toList).head  // pick free field
       target = field match {  // get x, y
