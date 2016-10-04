@@ -1,7 +1,8 @@
 // Tutorial Bot Class
 
-class ControlFunction {
+import scala.util.Random
 
+class ControlFunction(var movingDirection: (Int, Int)) {
   // The only door to the EXTERNAL world:
   //
   // Callback function, which is always called, when anything in the world around changes.
@@ -18,7 +19,9 @@ class ControlFunction {
 
   private def findPath(view: String) = {
     val pathFinder = new PathFinder(new MyView(view))
-    pathFinder.findPath()
+    val nextMovement = pathFinder.findPath(movingDirection)
+    this.movingDirection = nextMovement
+    nextMovement
   }
 
   private def parse(input: String): (String, Map[String, String]) = {
@@ -35,18 +38,107 @@ class ControlFunction {
   }
 }
 
+// abstract class: field (empty, wall, entity)
+abstract class Field
+case class BotSelf(x: Int, y: Int) extends Field
+case class Empty(x: Int, y: Int) extends Field
+case class Wall(x: Int, y: Int) extends Field
+case class Entity(kind: Kind, x: Int, y: Int) extends Field
+case class Unknown(x: Int, y: Int) extends Field
+
+abstract class Kind
+// good things
+case class Zugar() extends Kind
+case class Fluppet() extends Kind
+// evil things
+case class Toxifera() extends Kind
+case class Snorg() extends Kind
+
+
 // NEW
 // EXERCISE: Implement findPath, so that the Bot does not crash into a wall
 class PathFinder (view: MyView) {
-  def findPath() = {
-    val cellsWithOtherThanWall: Seq[(Int, Int)] = for {
-      x <- -1 to 1
-      y <- -1 to 1 if view.at(x,y)!='W' && view.at(x,y)!='M'
-    } yield (x,y)
+  def findPath(movingDirection: (Int, Int)) = {
 
-    val firstFreeCell: (Int, Int) = cellsWithOtherThanWall.head
-    println (s"FREE CELL: ${firstFreeCell}, CHAR = ${view.at(firstFreeCell._1,firstFreeCell._2)}")
-    firstFreeCell
+    var target = movingDirection  // default moving direction
+
+    // what kinds of things are in the view?
+    val viewContents: Seq[Field] = for {
+      x <- -1 to 1
+      y <- -1 to 1
+      e = view.at(x,y) match {
+        case '_' => Empty(x,y)
+        case 'M' => BotSelf(x,y)
+        case 'W' => Wall(x,y)
+        case 'P' => Entity(Zugar(), x, y)
+        case 'B' => Entity(Fluppet(), x, y)
+        case 'p' => Entity(Toxifera(), x, y)
+        case 'b' => Entity(Snorg(), x, y)
+        case _ => Unknown(x,y)
+      }
+    } yield e
+
+    // find out what's bad
+    val blocked = viewContents.filter(f => {
+      f match {
+        case BotSelf(_,_) => true
+        case Wall(_,_) => true
+        case Entity(Toxifera(), _, _) => true
+        case Entity(Snorg(), _, _) => true
+        case _ => false
+      }
+    })
+
+    // find free cells
+    val free = viewContents.filter(f => {
+      f match {
+        case BotSelf(_,_) => false
+        case Wall(_,_) => false
+        case Entity(Toxifera(), _, _) => false
+        case Entity(Snorg(), _, _) => false
+        case _ => true
+      }
+    })
+
+    // find out what's edible/good
+    val edible = viewContents.filter(f => {
+      f match {
+        case Entity(Zugar(), _, _) => true
+        case Entity(Fluppet(), _, _) => true
+        case _ => false
+      }
+    })
+
+    // move towards edible things
+    if (edible.nonEmpty) {
+      val targetField = edible.head
+      target = targetField match {
+        case Entity(Zugar(), x, y) => (x, y)
+        case Entity(Fluppet(), x, y) => (x, y)
+      }
+    }
+
+    // find out if moving direction is blocked
+    val blockInDirection = blocked.exists(f => {
+      f match {
+        case Wall(x,y) => (x,y) == target
+        case Entity(Toxifera(),x,y) => (x,y) == target
+        case Entity(Snorg(),x,y) => (x,y) == target
+        case _ => false
+      }
+    })
+    // move away from obstacles and evil things
+    if (blockInDirection) {  // we are blocked
+      val field = Random.shuffle(free.toList).head  // pick free field
+      target = field match {  // get x, y
+        case Empty(x,y) => (x,y)
+        case Entity(Zugar(), x, y) => (x, y)
+        case Entity(Fluppet(), x, y) => (x, y)
+      }
+    }
+
+    println (s"FREE CELL: ${target}, CHAR = ${view.at(target._1,target._2)}")
+    target
   }
 
 }
@@ -81,6 +173,6 @@ class MyView (val view: String){
 // Entry Point for the Server
 
 class ControlFunctionFactory {
-  def create = new ControlFunction().respond _
+  def create = new ControlFunction((1, -1)).respond _
 }
 
